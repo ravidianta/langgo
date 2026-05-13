@@ -3,7 +3,7 @@ import { jwtVerify } from 'jose'
 
 const getSecret = () => new TextEncoder().encode(process.env.JWT_SECRET!)
 
-const protectedRoutes = ['/dashboard', '/lessons', '/admin']
+const protectedRoutes = ['/dashboard', '/lessons', '/admin', '/learn', '/character-select']
 const adminRoutes = ['/admin']
 const authRoutes = ['/login', '/register']
 
