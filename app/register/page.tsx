@@ -41,7 +41,7 @@ export default function RegisterPage() {
         return
       }
 
-      router.push('/dashboard')
+      router.push('/character-select')
     } catch {
       setError('Something went wrong. Please try again.')
     } finally {
