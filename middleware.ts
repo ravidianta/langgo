@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { verifyToken } from '@/lib/auth'
+import { jwtVerify } from 'jose'
+
+const getSecret = () => new TextEncoder().encode(process.env.JWT_SECRET!)
 
 const protectedRoutes = ['/dashboard', '/lessons', '/admin']
 const adminRoutes = ['/admin']
@@ -18,7 +20,7 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL('/login', request.url))
     }
     try {
-      const payload = await verifyToken(token)
+      const { payload } = await jwtVerify(token, getSecret())
       if (isAdmin && payload.role !== 'ADMIN') {
         return NextResponse.redirect(new URL('/dashboard', request.url))
       }
@@ -29,7 +31,7 @@ export async function middleware(request: NextRequest) {
 
   if (isAuthPage && token) {
     try {
-      await verifyToken(token)
+      await jwtVerify(token, getSecret())
       return NextResponse.redirect(new URL('/dashboard', request.url))
     } catch {
       // invalid token, let them through

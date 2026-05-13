@@ -8,44 +8,80 @@ datasource db {
 }
 
 model User {
-  id              String        @id @default(uuid())
-  email           String        @unique
-  passwordHash    String
-  role            Role          @default(LEARNER)
-  difficultyScore Int           @default(1)
-  createdAt       DateTime      @default(now())
-  progress        Progress[]
-  attempts        QuizAttempt[]
+  id                String         @id @default(uuid())
+  email             String         @unique
+  passwordHash      String
+  role              Role           @default(LEARNER)
+  character         String         @default("momo")
+  hearts            Int            @default(5)
+  maxHearts         Int            @default(5)
+  xp                Int            @default(0)
+  level             Int            @default(1)
+  streakDays        Int            @default(0)
+  lastHeartRefill   DateTime?
+  currentSubLevelId String?
+  createdAt         DateTime       @default(now())
+  progress          Progress[]
+  attempts          QuizAttempt[]
+  voiceAttempts     VoiceAttempt[]
 }
 
-model Lesson {
-  id              String        @id @default(uuid())
-  title           String
-  language        String
-  difficultyLevel Int
-  category        String
-  questions       Question[]
-  progress        Progress[]
+model Unit {
+  id     String  @id @default(uuid())
+  name   String
+  country String
+  flag   String
+  theme  String
+  order  Int
+  topics Topic[]
+}
+
+model Topic {
+  id        String     @id @default(uuid())
+  unitId    String
+  name      String
+  emoji     String
+  order     Int
+  unit      Unit       @relation(fields: [unitId], references: [id])
+  subLevels SubLevel[]
+}
+
+model SubLevel {
+  id          String     @id @default(uuid())
+  topicId     String
+  number      String
+  label       String
+  isBoss      Boolean    @default(false)
+  isUnitBoss  Boolean    @default(false)
+  isVoiceOnly Boolean    @default(false)
+  order       Int
+  topic       Topic      @relation(fields: [topicId], references: [id])
+  questions   Question[]
+  progress    Progress[]
 }
 
 model Question {
-  id            String        @id @default(uuid())
-  lessonId      String
+  id            String         @id @default(uuid())
+  subLevelId    String
   prompt        String
   correctAnswer String
   type          QuestionType
-  lesson        Lesson        @relation(fields: [lessonId], references: [id])
+  isVoice       Boolean        @default(false)
+  options       String[]
+  subLevel      SubLevel       @relation(fields: [subLevelId], references: [id])
   attempts      QuizAttempt[]
+  voiceAttempts VoiceAttempt[]
 }
 
 model Progress {
   id          String   @id @default(uuid())
   userId      String
-  lessonId    String
+  subLevelId  String
   score       Int
+  passed      Boolean
   completedAt DateTime @default(now())
   user        User     @relation(fields: [userId], references: [id])
-  lesson      Lesson   @relation(fields: [lessonId], references: [id])
+  subLevel    SubLevel @relation(fields: [subLevelId], references: [id])
 }
 
 model QuizAttempt {
@@ -60,6 +96,18 @@ model QuizAttempt {
   question    Question @relation(fields: [questionId], references: [id])
 }
 
+model VoiceAttempt {
+  id          String   @id @default(uuid())
+  userId      String
+  questionId  String
+  transcript  String
+  score       Int
+  feedback    String
+  attemptedAt DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id])
+  question    Question @relation(fields: [questionId], references: [id])
+}
+
 enum Role {
   LEARNER
   ADMIN
@@ -69,4 +117,5 @@ enum QuestionType {
   MULTIPLE_CHOICE
   FREE_TEXT
   TRANSLATION
+  VOICE
 }
