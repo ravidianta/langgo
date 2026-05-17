@@ -54,10 +54,13 @@ export async function POST(request: NextRequest) {
         suggestion: '',
       }
     } else {
+      // MULTIPLE_CHOICE
+      console.log('Comparing:', JSON.stringify(sanitizedAnswer), 'vs', JSON.stringify(question.correctAnswer))
+      const isCorrect = sanitizedAnswer.trim().toLowerCase() === question.correctAnswer.trim().toLowerCase()
       feedback = {
-        isCorrect: sanitizedAnswer.toLowerCase() === question.correctAnswer.toLowerCase(),
-        explanation: '',
-        suggestion: '',
+        isCorrect,
+        explanation: isCorrect ? '' : `The correct answer is: ${question.correctAnswer}`,
+        suggestion: isCorrect ? '' : question.correctAnswer,
       }
     }
 
@@ -71,17 +74,14 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    // Update hearts if wrong
     let newHearts = user?.hearts ?? 5
     if (!feedback.isCorrect && user?.character !== 'dinda') {
       newHearts = Math.max(0, newHearts - 1)
     }
 
-    // Update XP if correct
     let xpGain = 0
     if (feedback.isCorrect) {
       xpGain = xpByCharacter[user?.character ?? 'momo'] ?? 10
-      // Momo random multiplier
       if (user?.character === 'momo') {
         xpGain = xpGain * (Math.floor(Math.random() * 3) + 1)
       }
