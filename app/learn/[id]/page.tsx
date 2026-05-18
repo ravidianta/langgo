@@ -89,7 +89,11 @@ export default function LessonPage({ params }: { params: Promise<{ id: string }>
       setCorrectCount(c => c + 1)
       setXpGained(x => x + 10)
     } else {
-      setHearts(h => Math.max(0, h - 1))
+      const newHearts = Math.max(0, hearts - 1)
+      setHearts(newHearts)
+      if (newHearts === 0) {
+        setTimeout(() => router.push('/respawn'), 1500)
+      }
     }
 
     setSubmitting(false)

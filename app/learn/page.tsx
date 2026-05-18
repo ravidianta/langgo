@@ -95,6 +95,7 @@ export default function LearnPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+  function loadData() {
     fetch('/api/learn')
       .then(r => r.json())
       .then(data => {
@@ -102,7 +103,12 @@ export default function LearnPage() {
         setUser(data.user ?? null)
         setLoading(false)
       })
-  }, [])
+  }
+
+  loadData()
+  const interval = setInterval(loadData, 5000)
+  return () => clearInterval(interval)
+}, [])
 
   if (loading) {
     return (
