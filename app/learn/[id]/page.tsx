@@ -99,8 +99,20 @@ export default function LessonPage({ params }: { params: Promise<{ id: string }>
     setSubmitting(false)
   }
 
+  async function saveProgress(passed: boolean, score: number) {
+  if (!id) return
+  await fetch('/api/progress', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ subLevelId: id, score, passed }),
+  })
+}
+
   function nextQuestion() {
     if (currentQ + 1 >= (subLevel?.questions.length ?? 0)) {
+      const score = Math.round((correctCount / subLevel!.questions.length) * 100)
+      const passed = subLevel?.isBoss ? score >= 70 : score >= 50
+      saveProgress(passed, score)
       setFinished(true)
     } else {
       setCurrentQ(q => q + 1)
